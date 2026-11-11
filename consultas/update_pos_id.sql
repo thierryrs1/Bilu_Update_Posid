@@ -7,6 +7,7 @@ DO BEGIN
 	      * A operação MES atualmente NÃO é a última (existe operação com POS_ID maior)
 	  - Reordena as operações para que a Master (UDF1 = '1') vá para o final de cada item
 	  - Define todas as outras operações como Slaves dela (MASTER_POS_ID = novo POS_ID final)
+	  - Reseta a ligação da lista de materiais na BEAS_STL (aplanpos_id = null)
 	*/
 
 	-- 1. Tabela temporária para listar os itens candidatos elegíveis
@@ -99,12 +100,17 @@ DO BEGIN
 		END FOR;
 	END;
 
-	-- 6. Limpeza das tabelas temporárias
+	-- 6. Atualização da estrutura de materiais (BEAS_STL) para os itens alterados
+	UPDATE "BEAS_STL"
+	SET "APLANPOS_ID" = NULL
+	WHERE "ItemCode" IN (SELECT "ItemCode" FROM #TMP_ITENS_ELEGIVEIS);
+
+	-- 7. Limpeza das tabelas temporárias
 	DROP TABLE #TMP_ITENS_ELEGIVEIS;
 	DROP TABLE #TMP_APL_NOVA_ORDEM;
 	DROP TABLE #TMP_APL_MASTER_FINAL;
 
-	-- 7. Conferência dos registros processados
+	-- 8. Conferência dos registros processados
 	SELECT
 		T."ItemCode",
 		T."POS_ID",
