@@ -1,0 +1,6 @@
+# Ignorar arquivos temporários e logs
+*.tmp
+*.log
+.vscode/
+.idea/
+
